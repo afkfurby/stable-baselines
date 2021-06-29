@@ -1,13 +1,6 @@
 import numpy as np
 import tensorflow as tf
-try:
-  tpu = tf.distribute.cluster_resolver.TPUClusterResolver()  # TPU detection
-  tf.config.experimental_connect_to_cluster(tpu)
-  tf.tpu.experimental.initialize_tpu_system(tpu)
-  tpu_strategy = tf.distribute.experimental.TPUStrategy(tpu)
-  print('Running on TPU ', tpu.cluster_spec().as_dict()['worker'])
-except ValueError:
-  print("no TPU, running on GPU or CPU")
+
 
 from tensorflow.python.ops import math_ops
 from gym import spaces
