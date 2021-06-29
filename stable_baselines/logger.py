@@ -132,12 +132,12 @@ class JSONOutputFormat(KVWriter):
     def writekvs(self, kvs):
         for key, value in sorted(kvs.items()):
             if hasattr(value, 'dtype'):
-                if value.shape == () or len(value) == 1:  # pytype: disable=attribute-error
+                if value.shape == () or len(value) == 1:
                     # if value is a dimensionless numpy array or of length 1, serialize as a float
                     kvs[key] = float(value)
                 else:
                     # otherwise, a value is a numpy array, serialize as a list or nested lists
-                    kvs[key] = value.tolist()  # pytype: disable=attribute-error
+                    kvs[key] = value.tolist()
         self.file.write(json.dumps(kvs) + '\n')
         self.file.flush()
 
@@ -198,7 +198,7 @@ def summary_val(key, value):
     :param value: (float)
     """
     kwargs = {'tag': key, 'simple_value': float(value)}
-    return tf.Summary.Value(**kwargs)
+    return tf.compat.v1.Summary.Value(**kwargs)
 
 
 def valid_float_value(value):
@@ -230,7 +230,7 @@ class TensorBoardOutputFormat(KVWriter):
         self.writer = pywrap_tensorflow.EventsWriter(compat.as_bytes(path))  # type: pywrap_tensorflow.EventsWriter
 
     def writekvs(self, kvs):
-        summary = tf.Summary(value=[summary_val(k, v) for k, v in kvs.items() if valid_float_value(v)])
+        summary = tf.compat.v1.Summary(value=[summary_val(k, v) for k, v in kvs.items() if valid_float_value(v)])
         event = event_pb2.Event(wall_time=time.time(), summary=summary)
         event.step = self.step  # is there any reason why you'd want to specify the step?
         if self.writer is None:
@@ -725,7 +725,7 @@ def read_tb(path):
     tag2pairs = defaultdict(list)
     maxstep = 0
     for fname in fnames:
-        for summary in tf.train.summary_iterator(fname):
+        for summary in tf.compat.v1.train.summary_iterator(fname):
             if summary.step > 0:
                 for value in summary.summary.value:
                     pair = (summary.step, value.simple_value)
